@@ -55,6 +55,7 @@ jobs:
 
       - name: Package binaries
         working-directory: statshouse
+        shell: bash
         run: |
           set -euo pipefail
           bins=(statshouse statshouse-agg statshouse-api statshouse-metadata)
