@@ -20,7 +20,7 @@ jobs:
             os: ubuntu-22.04
             container: debian:12
           - arch: arm64
-            os: ubuntu-24.04-arm64
+            os: ubuntu-24.04-arm
             container: ubuntu:24.04
     steps:
       - name: Checkout build repo
@@ -49,18 +49,33 @@ jobs:
 
       - name: Build
         working-directory: statshouse
+        env:
+          BUILD_TRUSTED_SUBNET_GROUPS: "0.0.0.0/0"
         run: make
 
       - name: Package binaries
         working-directory: statshouse
         run: |
-          tar czf ../statshouse-${{ matrix.arch }}.tar.gz -C target .
+          set -euo pipefail
+          bins=(statshouse statshouse-agg statshouse-api statshouse-metadata)
+          for bin in "${bins[@]}"; do
+            src="target/${bin}"
+            if [ ! -f "$src" ]; then
+              echo "Missing binary: $src" >&2
+              exit 1
+            fi
+            tar czf "../${bin}-${{ matrix.arch }}.tar.gz" -C target "$bin"
+          done
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: statshouse-${{ matrix.arch }}
-          path: statshouse-${{ matrix.arch }}.tar.gz
+          path: |
+            statshouse-${{ matrix.arch }}.tar.gz
+            statshouse-agg-${{ matrix.arch }}.tar.gz
+            statshouse-api-${{ matrix.arch }}.tar.gz
+            statshouse-metadata-${{ matrix.arch }}.tar.gz
 
   release:
     name: Release
