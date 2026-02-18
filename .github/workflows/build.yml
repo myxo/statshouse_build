@@ -37,7 +37,7 @@ jobs:
       - name: Checkout statshouse
         uses: actions/checkout@v4
         with:
-          repository: vkcom/statshouse
+          repository: myxo/statshouse
           ref: ${{ env.STATSHOUSE_COMMIT }}
           path: statshouse
 
